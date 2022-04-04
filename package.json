@@ -19,5 +19,8 @@
   "bin": {
     "create-pr": "./bin/index.js"
   },
-  "type": "module"
+  "type": "module",
+  "dependencies": {
+    "@octokit/graphql": "^4.8.0"
+  }
 }
