@@ -1,0 +1,23 @@
+{
+  "name": "create-pr",
+  "version": "1.0.0",
+  "description": "A nodejs CLI tool to open Pull Request based on present working directory git repo and branch",
+  "main": "bin/index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/vaishnavgade/create-pr.git"
+  },
+  "author": "Sri Vaishnav Gade",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/vaishnavgade/create-pr/issues"
+  },
+  "homepage": "https://github.com/vaishnavgade/create-pr#readme",
+  "bin": {
+    "create-pr": "./bin/index.js"
+  },
+  "type": "module"
+}
