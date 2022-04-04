@@ -17,5 +17,7 @@ try {
     console.log(`Git remote url: ${gitData}`);
 }
 catch(error) {
-    console.error(`The current directory might not be a git repo. Error: ${error}`);
+    console.error(`The current directory might not be a git repo. ${error}`);
+    process.exit(1) //mandatory (as per the Node.js docs)
 }
+
