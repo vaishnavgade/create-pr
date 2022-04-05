@@ -78,7 +78,16 @@ const userDetails = await graphqlWithAuth(queryUserByLogin,
     }
 );
 
-console.log(JSON.stringify(userDetails));
+let assigneeId = '';
+if(userDetails) {
+    console.log(JSON.stringify(userDetails));
+    if(userDetails.hasOwnProperty("user")) {
+        if (userDetails["user"].hasOwnProperty("id")) {
+            assigneeId = userDetails["user"]["id"];
+            console.log(`AssigneeId: ${assigneeId}`);
+        }    
+    }
+}
 //#endregion
 
 //#region Get RepositoryId using Owner and Repo Name
@@ -149,4 +158,40 @@ if(createdPullRequest) {
         }    
     }
 }
+//#endregion
+
+//#region Add Assignee to Pull Request
+const mutationAddAssigneesToAssignableByInput = `
+    mutation addAssigneesToAssignableByInput($input: AddAssigneesToAssignableInput) {
+        addAssigneesToAssignable(input: $input) {
+            clientMutationId
+            assignable {
+                assignees(first: 10) {
+                    nodes {
+                        id
+                        email
+                        login
+                    }
+                }
+            }
+        }
+    }
+`;
+
+const addAssigneesToAssignable = await graphqlWithAuth(mutationAddAssigneesToAssignableByInput, 
+    {
+        input: {
+            clientMutationId: "create-pr",
+            assignableId: `${pullRequestId}`,
+            assigneeIds: [
+                `${assigneeId}`
+            ]
+          }
+    }
+);
+
+if(addAssigneesToAssignable){
+    console.log(JSON.stringify(addAssigneesToAssignable));
+}
+
 //#endregion
