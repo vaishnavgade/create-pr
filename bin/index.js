@@ -62,6 +62,19 @@ catch (error) {
 }
 //#endregion
 
+//#region Get first Commit
+let getFirstCommit = `git log main...${gitBranch} --oneline | tail -1`;
+let firstCommit = '';
+try {
+    firstCommit = new String(execSync(getFirstCommit));
+    console.log(`First Commit of current branch: ${firstCommit}`);
+}
+catch (error) {
+    console.error(`Error while trying to get first commit. ${error}`);
+    process.exit(1) // mandatory (as per the Node.js docs)
+}
+//#endregion
+
 //#region Get User(s) Id(s) to be used as Assignees/Reviewers
 const queryUserByLogin = `
     query userByLogin($login: String!) {
@@ -142,7 +155,7 @@ const createdPullRequest = await graphqlWithAuth(mutationCreatePullRequestByInpu
             clientMutationId: `${clientMutationId}`,
             headRefName: `${gitBranch}`,
             repositoryId: `${repositoryId}`,
-            title: "create-pr from local branch" // JIRA integration 
+            title: `${firstCommit}`
           }
     }
 );
