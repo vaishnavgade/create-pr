@@ -18,7 +18,6 @@ console.log(`
 const clientMutationId = 'create-pr';
 const getRemoteGitUrlCommand = 'git config --get remote.origin.url';
 const getCurrentGitBranchCommand = 'git branch --show-current';
-const getFirstCommit = 'git log --oneline | tail -1';
 
 const graphqlWithAuth = graphql.defaults({
     baseUrl: "https://api.github.com",
@@ -63,7 +62,8 @@ catch (error) {
 }
 //#endregion
 
-//#region Get Last Commit
+//#region Get first Commit
+let getFirstCommit = `git log main...${gitBranch} --oneline | tail -1`;
 let firstCommit = '';
 try {
     firstCommit = new String(execSync(getFirstCommit));
