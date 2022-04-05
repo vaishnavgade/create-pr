@@ -2,6 +2,8 @@
 import 'dotenv/config';
 import { execSync } from 'child_process';
 import { graphql } from '@octokit/graphql';
+import queries from '../graphql/queries';
+import mutations from '../graphql/mutations';
 
 console.log(`
 
@@ -92,17 +94,7 @@ for (let index = 0; index < reviewerLogins.length; index++) {
 //#endregion
 
 //#region Get RepositoryId using Owner and Repo Name
-const queryRepositoryByOwnerAndName = `
-    query repositoryByOwnerAndName($owner: String!, $name: String!) {
-        repository(owner: $owner, name: $name) {
-            id
-            description
-            createdAt
-        }
-    }
-`;
-
-const repoDetails = await graphqlWithAuth(queryRepositoryByOwnerAndName,
+const repoDetails = await graphqlWithAuth(queries.queryRepositoryByOwnerAndName,
     {
         owner: `${owner}`,
         name: `${repo}`
@@ -122,20 +114,7 @@ if(repoDetails) {
 //#endregion
 
 //#region Get PullRequestId and Create Pull Request using Git Branch, RepositoryId
-const mutationCreatePullRequestByInput = `
-    mutation createPullRequestByInput($input: CreatePullRequestInput!) {
-        createPullRequest(input: $input) {
-            clientMutationId
-            pullRequest {
-                id
-                body
-                createdAt
-            }
-        }
-    }
-`;
-
-const createdPullRequest = await graphqlWithAuth(mutationCreatePullRequestByInput, 
+const createdPullRequest = await graphqlWithAuth(mutations.mutationCreatePullRequestByInput, 
     {
         input: {
             baseRefName: `${process.env.BASE_BRANCH_NAME}`,
@@ -162,24 +141,7 @@ if(createdPullRequest) {
 //#endregion
 
 //#region Add Assignee to Pull Request
-const mutationAddAssigneesToAssignableByInput = `
-    mutation addAssigneesToAssignableByInput($input: AddAssigneesToAssignableInput!) {
-        addAssigneesToAssignable(input: $input) {
-            clientMutationId
-            assignable {
-                assignees(first: 10) {
-                    nodes {
-                        id
-                        email
-                        login
-                    }
-                }
-            }
-        }
-    }
-`;
-
-const addAssigneesToAssignable = await graphqlWithAuth(mutationAddAssigneesToAssignableByInput, 
+const addAssigneesToAssignable = await graphqlWithAuth(mutations.mutationAddAssigneesToAssignableByInput, 
     {
         input: {
             clientMutationId: `${clientMutationId}`,
@@ -195,20 +157,7 @@ if(addAssigneesToAssignable){
 //#endregion
 
 //#region Request Reviews By Pull Request Id
-const mutationRequestReviewsByInput = `
-    mutation requestReviewsByInput($input: RequestReviewsInput!) {
-        requestReviews(input: $input) {
-            clientMutationId
-            pullRequest {
-                id
-                body
-                createdAt
-            }
-        }
-    }
-`;
-
-const requestReviews = await graphqlWithAuth(mutationRequestReviewsByInput, 
+const requestReviews = await graphqlWithAuth(mutations.mutationRequestReviewsByInput, 
     {
         input: {
             clientMutationId: `${clientMutationId}`,
@@ -223,18 +172,9 @@ if(requestReviews){
 }
 //#endregion
 
-async function getUserIdsByLogin(login) {
-    const queryUserByLogin = `
-    query userByLogin($login: String!) {
-        user(login: $login) {
-            id
-            email
-            login
-        }
-    }
-`;
-
-    const userDetails = await graphqlWithAuth(queryUserByLogin,
+async function getUserIdsByLogin(login) 
+{
+    const userDetails = await graphqlWithAuth(queries.queryUserByLogin,
         {
             login: `${login}`
         }
