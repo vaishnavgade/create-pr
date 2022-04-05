@@ -194,5 +194,36 @@ const addAssigneesToAssignable = await graphqlWithAuth(mutationAddAssigneesToAss
 if(addAssigneesToAssignable){
     console.log(JSON.stringify(addAssigneesToAssignable));
 }
+//#endregion
+
+//#region Request Reviews By Pull Request Id
+const mutationRequestReviewsByInput = `
+    mutation requestReviewsByInput($input: RequestReviewsInput!) {
+        requestReviews(input: $input) {
+            clientMutationId
+            pullRequest {
+                id
+                body
+                createdAt
+            }
+        }
+    }
+`;
+
+const requestReviews = await graphqlWithAuth(mutationRequestReviewsByInput, 
+    {
+        input: {
+            clientMutationId: `${clientMutationId}`,
+            pullRequestId: `${pullRequestId}`,
+            userIds: [
+                `${assigneeId}`
+            ]
+          }
+    }
+);
+
+if(requestReviews){
+    console.log(JSON.stringify(requestReviews));
+}
 
 //#endregion
