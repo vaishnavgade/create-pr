@@ -15,6 +15,7 @@ console.log(`
 `);
 
 //#region constants
+const clientMutationId = 'create-pr';
 const getRemoteGitUrlCommand = 'git config --get remote.origin.url';
 const getCurrentGitBranchCommand = 'git branch --show-current';
 
@@ -42,8 +43,8 @@ let ownerPlusRepo = splitURL[1].split('/');
 const owner = ownerPlusRepo[0];
 const repo = ownerPlusRepo[1].split('.')[0];
 
-console.log(owner);
-console.log(repo);
+console.log(`owner: ${owner}`);
+console.log(`repo/name: ${repo}`);
 
 //#endregion
 
@@ -138,10 +139,10 @@ const createdPullRequest = await graphqlWithAuth(mutationCreatePullRequestByInpu
     {
         input: {
             baseRefName: "main",
-            clientMutationId: "create-pr",
+            clientMutationId: `${clientMutationId}`,
             headRefName: `${gitBranch}`,
             repositoryId: `${repositoryId}`,
-            title: "create-pr from local branch" 
+            title: "create-pr from local branch" // JIRA integration 
           }
     }
 );
@@ -162,7 +163,7 @@ if(createdPullRequest) {
 
 //#region Add Assignee to Pull Request
 const mutationAddAssigneesToAssignableByInput = `
-    mutation addAssigneesToAssignableByInput($input: AddAssigneesToAssignableInput) {
+    mutation addAssigneesToAssignableByInput($input: AddAssigneesToAssignableInput!) {
         addAssigneesToAssignable(input: $input) {
             clientMutationId
             assignable {
@@ -181,7 +182,7 @@ const mutationAddAssigneesToAssignableByInput = `
 const addAssigneesToAssignable = await graphqlWithAuth(mutationAddAssigneesToAssignableByInput, 
     {
         input: {
-            clientMutationId: "create-pr",
+            clientMutationId: `${clientMutationId}`,
             assignableId: `${pullRequestId}`,
             assigneeIds: [
                 `${assigneeId}`
