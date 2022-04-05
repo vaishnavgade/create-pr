@@ -79,17 +79,16 @@ catch (error) {
 const assigneeLogins = process.env.ASSIGNEE_LOGINS.split('|');
 let assigneeIds = new Array(assigneeLogins.length);
 
-assigneeLogins.forEach(login => {
-    assigneeIds.push(await getUserIdsByLogin(login));
-});
+for (let index = 0; index < assigneeLogins.length; index++) {
+    assigneeIds[index] = await getUserIdsByLogin(assigneeLogins[index]);
+}
 
 const reviewerLogins = process.env.REVIEWERS_LOGINS.split('|');
 let reviewerIds = new Array(reviewerLogins.length);
 
-reviewerLogins.forEach(login => {
-    reviewerIds.push(await getUserIdsByLogin(login));
-});
-
+for (let index = 0; index < reviewerLogins.length; index++) {
+    reviewerIds[index] = await getUserIdsByLogin(reviewerLogins[index]);    
+}
 //#endregion
 
 //#region Get RepositoryId using Owner and Repo Name
@@ -245,7 +244,7 @@ async function getUserIdsByLogin(login) {
         console.log(JSON.stringify(userDetails));
         if (userDetails.hasOwnProperty("user")) {
             if (userDetails["user"].hasOwnProperty("id")) {
-                console.log(`AssigneeId for ${login}: ${assigneeId}`);
+                console.log(`AssigneeId for ${login}: ${userDetails["user"]["id"]}`);
                 return userDetails["user"]["id"];
             }
         }
