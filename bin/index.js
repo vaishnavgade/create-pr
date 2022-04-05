@@ -20,7 +20,7 @@ const getRemoteGitUrlCommand = 'git config --get remote.origin.url';
 const getCurrentGitBranchCommand = 'git branch --show-current';
 
 const graphqlWithAuth = graphql.defaults({
-    baseUrl: "https://api.github.com",
+    baseUrl: `${process.env.GITHUB_GRAPHQL_URL}`,
     headers: {
         authorization: `Bearer ${process.env.GITHUBPAT}`,
     },
@@ -63,7 +63,7 @@ catch (error) {
 //#endregion
 
 //#region Get first Commit
-let getFirstCommit = `git log main...${gitBranch} --oneline | tail -1`;
+let getFirstCommit = `git log ${process.env.BASE_BRANCH_NAME}...${gitBranch} --oneline | tail -1`;
 let firstCommit = '';
 try {
     firstCommit = new String(execSync(getFirstCommit));
@@ -75,33 +75,21 @@ catch (error) {
 }
 //#endregion
 
-//#region Get User(s) Id(s) to be used as Assignees/Reviewers
-const queryUserByLogin = `
-    query userByLogin($login: String!) {
-        user(login: $login) {
-            id
-            email
-            login
-        }
-    }
-`;
+//#region Get User(s) Id(s) to be used as Assignee(s)/Reviewer(s)
+const assigneeLogins = process.env.ASSIGNEE_LOGINS.split('|');
+let assigneeIds = new Array(assigneeLogins.length);
 
-const userDetails = await graphqlWithAuth(queryUserByLogin,
-    {
-        login: 'vaishnavgade'
-    }
-);
+assigneeLogins.forEach(login => {
+    assigneeIds.push(await getUserIdsByLogin(login));
+});
 
-let assigneeId = '';
-if(userDetails) {
-    console.log(JSON.stringify(userDetails));
-    if(userDetails.hasOwnProperty("user")) {
-        if (userDetails["user"].hasOwnProperty("id")) {
-            assigneeId = userDetails["user"]["id"];
-            console.log(`AssigneeId: ${assigneeId}`);
-        }    
-    }
-}
+const reviewerLogins = process.env.REVIEWERS_LOGINS.split('|');
+let reviewerIds = new Array(reviewerLogins.length);
+
+reviewerLogins.forEach(login => {
+    reviewerIds.push(await getUserIdsByLogin(login));
+});
+
 //#endregion
 
 //#region Get RepositoryId using Owner and Repo Name
@@ -151,7 +139,7 @@ const mutationCreatePullRequestByInput = `
 const createdPullRequest = await graphqlWithAuth(mutationCreatePullRequestByInput, 
     {
         input: {
-            baseRefName: "main",
+            baseRefName: `${process.env.BASE_BRANCH_NAME}`,
             clientMutationId: `${clientMutationId}`,
             headRefName: `${gitBranch}`,
             repositoryId: `${repositoryId}`,
@@ -197,9 +185,7 @@ const addAssigneesToAssignable = await graphqlWithAuth(mutationAddAssigneesToAss
         input: {
             clientMutationId: `${clientMutationId}`,
             assignableId: `${pullRequestId}`,
-            assigneeIds: [
-                `${assigneeId}`
-            ]
+            assigneeIds: assigneeIds
           }
     }
 );
@@ -228,9 +214,7 @@ const requestReviews = await graphqlWithAuth(mutationRequestReviewsByInput,
         input: {
             clientMutationId: `${clientMutationId}`,
             pullRequestId: `${pullRequestId}`,
-            userIds: [
-                `${assigneeId}`
-            ]
+            userIds: reviewerIds
           }
     }
 );
@@ -238,5 +222,32 @@ const requestReviews = await graphqlWithAuth(mutationRequestReviewsByInput,
 if(requestReviews){
     console.log(JSON.stringify(requestReviews));
 }
-
 //#endregion
+
+async function getUserIdsByLogin(login) {
+    const queryUserByLogin = `
+    query userByLogin($login: String!) {
+        user(login: $login) {
+            id
+            email
+            login
+        }
+    }
+`;
+
+    const userDetails = await graphqlWithAuth(queryUserByLogin,
+        {
+            login: `${login}`
+        }
+    );
+
+    if (userDetails) {
+        console.log(JSON.stringify(userDetails));
+        if (userDetails.hasOwnProperty("user")) {
+            if (userDetails["user"].hasOwnProperty("id")) {
+                console.log(`AssigneeId for ${login}: ${assigneeId}`);
+                return userDetails["user"]["id"];
+            }
+        }
+    }
+}
