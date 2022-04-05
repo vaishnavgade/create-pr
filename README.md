@@ -3,7 +3,6 @@ A nodejs CLI tool to open Pull Request based on present working directory git re
 
 ### TODO:
 
-- Either JIRA integration to add the title to PullRequest or use first git commit
-- GitHub OAuth Token should be configurableqsw
+- GitHub OAuth Token should be configurable
 - Assignees should be configurable
 - Reviewers should be configurable

@@ -18,6 +18,7 @@ console.log(`
 const clientMutationId = 'create-pr';
 const getRemoteGitUrlCommand = 'git config --get remote.origin.url';
 const getCurrentGitBranchCommand = 'git branch --show-current';
+const getFirstCommit = 'git log --oneline | tail -1';
 
 const graphqlWithAuth = graphql.defaults({
     baseUrl: "https://api.github.com",
@@ -58,6 +59,18 @@ try {
 }
 catch (error) {
     console.error(`The current directory might not be a git repo. ${error}`);
+    process.exit(1) // mandatory (as per the Node.js docs)
+}
+//#endregion
+
+//#region Get Last Commit
+let firstCommit = '';
+try {
+    firstCommit = new String(execSync(getFirstCommit));
+    console.log(`First Commit of current branch: ${firstCommit}`);
+}
+catch (error) {
+    console.error(`Error while trying to get first commit. ${error}`);
     process.exit(1) // mandatory (as per the Node.js docs)
 }
 //#endregion
@@ -142,7 +155,7 @@ const createdPullRequest = await graphqlWithAuth(mutationCreatePullRequestByInpu
             clientMutationId: `${clientMutationId}`,
             headRefName: `${gitBranch}`,
             repositoryId: `${repositoryId}`,
-            title: "create-pr from local branch" // JIRA integration 
+            title: `${firstCommit}`
           }
     }
 );
