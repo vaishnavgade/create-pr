@@ -18,7 +18,7 @@ const queryRepositoryByOwnerAndName = `
     }
 `;
 
-module.exports = {
-    queryUserByLogin: queryUserByLogin,
-    queryRepositoryByOwnerAndName: queryRepositoryByOwnerAndName
-}
+export {
+    queryUserByLogin,
+    queryRepositoryByOwnerAndName
+};

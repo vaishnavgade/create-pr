@@ -2,8 +2,8 @@
 import 'dotenv/config';
 import { execSync } from 'child_process';
 import { graphql } from '@octokit/graphql';
-import queries from '../graphql/queries';
-import mutations from '../graphql/mutations';
+import * as queries from '../graphql/queries.js';
+import * as mutations from '../graphql/mutations.js';
 
 console.log(`
 

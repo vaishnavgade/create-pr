@@ -41,8 +41,8 @@ const mutationRequestReviewsByInput = `
     }
 `;
 
-module.exports = {
-    mutationCreatePullRequestByInput: mutationCreatePullRequestByInput,
-    mutationAddAssigneesToAssignableByInput: mutationAddAssigneesToAssignableByInput,
-    mutationRequestReviewsByInput: mutationRequestReviewsByInput
+export {
+    mutationCreatePullRequestByInput,
+    mutationAddAssigneesToAssignableByInput,
+    mutationRequestReviewsByInput
 }
